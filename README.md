@@ -65,8 +65,8 @@ Benefits:
 ### Clone Repository
 
 ```bash
-git clone <your-repo-url>
-cd <project-folder>
+git clone https://github.com/GouravGupta19/fullstack-pdf-rag.git
+cd fullstack-pdf-rag
 ```
 
 ### Install Dependencies
