@@ -17,62 +17,54 @@ services:
 
   # 3. Backend API (Express)
   server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    image: garry27/pdf-rag-server:latest
     ports:
       - 8000:8000
     depends_on:
       - valkey
       - qdrant
-    command: ["node", "index.js"]
     volumes:
-      # Mount uploads folder so PDFs persist and can be read by worker
-      - ./server/uploads:/app/uploads
-    env_file:
-      - ./server/.env
+      - server_uploads:/app/uploads
     environment:
       - REDIS_HOST=valkey
       - REDIS_PORT=6379
       - QDRANT_URL=http://qdrant:6333
-      # We assume the frontend is running locally, change for production
       - FRONTEND_URL=http://localhost:3000
+      # Required API Keys:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - JINA_API_KEY=${JINA_API_KEY}
 
   # 4. Background Worker (BullMQ)
   worker:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    image: garry27/pdf-rag-worker:latest
     depends_on:
       - valkey
       - qdrant
       - server
-    command: ["node", "worker.js"]
     volumes:
-      # Mount the same uploads folder so worker can read files uploaded to server
-      - ./server/uploads:/app/uploads
-    env_file:
-      - ./server/.env
+      - server_uploads:/app/uploads
     environment:
       - REDIS_HOST=valkey
       - REDIS_PORT=6379
       - QDRANT_URL=http://qdrant:6333
+      # Required API Keys:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - JINA_API_KEY=${JINA_API_KEY}
 
   # 5. Frontend UI (Next.js)
   client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
+    image: garry27/pdf-rag-client:latest
     ports:
       - 3000:3000
     depends_on:
       - server
-    env_file:
-      - ./client/.env
     environment:
-      # Point to the internal server on the Docker network if deploying, or localhost if testing
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      # Required Clerk Keys:
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
 
 volumes:
   valkey_data:
   qdrant_data:
+  server_uploads:
