@@ -21,18 +21,47 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-[#09090b] text-slate-50 font-sans selection:bg-indigo-500/30">
         <ClerkProvider>
-          <section >
+          <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/50 backdrop-blur-md">
+            <div className="container mx-auto flex h-14 items-center justify-between px-4">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <h1 className="text-sm font-semibold tracking-tight text-slate-200">Grok PDF Intelligence</h1>
+              </div>
+              <div className="flex items-center gap-4">
+                <Show when="signed-out">
+                  <div className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors">
+                    <SignUpButton />
+                  </div>
+                </Show>
+                <Show when="signed-in">
+                  <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "h-8 w-8 border border-white/10" } }} />
+                </Show>
+              </div>
+            </div>
+          </header>
+          
+          <main className="flex-1 flex overflow-hidden">
             <Show when="signed-out">
-              <SignUpButton />
+              <div className="flex flex-1 items-center justify-center flex-col gap-6 p-8 text-center">
+                <div className="rounded-full bg-indigo-500/10 p-6 border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>
+                </div>
+                <div className="max-w-md space-y-2">
+                  <h2 className="text-2xl font-bold tracking-tight text-white">Chat with your PDFs</h2>
+                  <p className="text-slate-400">Sign in to upload documents, extract knowledge, and ask complex questions powered by Groq and Llama 3.</p>
+                </div>
+              </div>
             </Show>
-          </section>
-          <Show when="signed-in">
-            {children}
-          </Show>
+            <Show when="signed-in">
+              {children}
+            </Show>
+          </main>
         </ClerkProvider>
       </body>
     </html>

@@ -3,7 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { Queue } from 'bullmq';
-import { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { OpenAIEmbeddings } from '@langchain/openai';
+import { ChatGroq } from '@langchain/groq';
 import { QdrantVectorStore } from '@langchain/qdrant';
 
 /**
@@ -12,8 +13,9 @@ import { QdrantVectorStore } from '@langchain/qdrant';
  */
 const queue = new Queue('file-upload-queue', {
     connection: {
-        host: 'localhost',
-        port: '6379',
+        host: process.env.REDIS_HOST || 'localhost',
+        port: process.env.REDIS_PORT || 6379,
+        password: process.env.REDIS_PASSWORD || undefined,
     },
 });
 
@@ -63,14 +65,17 @@ app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
 app.get('/chat', async (req, res) => {
     const userQuery = req.query.message;
 
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-        model: 'text-embedding-004',
-        apiKey: process.env.GEMINI_API_KEY,
+    const embeddings = new OpenAIEmbeddings({
+        model: 'jina-embeddings-v3',
+        apiKey: process.env.JINA_API_KEY,
+        configuration: {
+            baseURL: 'https://api.jina.ai/v1',
+        },
     });
     const vectorStore = await QdrantVectorStore.fromExistingCollection(
         embeddings,
         {
-            url: 'http://localhost:6333',
+            url: process.env.QDRANT_URL || 'http://localhost:6333',
             collectionName: 'langchainjs-testing',
         }
     );
@@ -87,11 +92,11 @@ app.get('/chat', async (req, res) => {
 
     /**
      * LLM Generation:
-     * Uses Gemini 1.5 Flash to answer the user query based on retrieved docs.
+     * Uses Groq (Qwen 3.6 27B) to answer the user query based on retrieved docs.
      */
-    const chatModel = new ChatGoogleGenerativeAI({
-        model: 'gemini-1.5-flash',
-        apiKey: process.env.GEMINI_API_KEY,
+    const chatModel = new ChatGroq({
+        model: 'qwen/qwen3.6-27b',
+        apiKey: process.env.GROQ_API_KEY,
     });
 
     const chatResult = await chatModel.invoke([

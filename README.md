@@ -25,7 +25,8 @@ Docker is used to containerize external dependencies like **Valkey** and **Qdran
 ### Backend / AI
 * Node.js
 * LangChain
-* Gemini API
+* Groq API (Llama 3.3 70B for chat)
+* Jina AI (jina-embeddings-v3 for vector embeddings)
 * BullMQ
 
 ### Database / Infrastructure
@@ -45,7 +46,7 @@ Docker is used to containerize external dependencies like **Valkey** and **Qdran
 3. Job metadata is stored in **Valkey**, which acts as the queue backend.
 4. A background worker processes the PDF asynchronously.
 5. Text is extracted and split into smaller chunks.
-6. Embeddings are generated using **Gemini API** via **LangChain**.
+6. Embeddings are generated using **Jina AI API** via **LangChain**.
 7. These embeddings are stored in **Qdrant**.
 8. User sends a query in the chat interface.
 9. Relevant chunks are retrieved from Qdrant using semantic search.
@@ -95,7 +96,8 @@ CLERK_SECRET_KEY=
 
 **Server (`server/.env`):**
 ```env
-GEMINI_API_KEY=
+GROQ_API_KEY=
+JINA_API_KEY=
 ```
 
 ## Start Services
